@@ -1,0 +1,38 @@
+\documentclass[12pt, a4paper, onecolumn, oneside]{report}
+
+\input{CONFIG/metadata.tex}
+\input{CONFIG/packages.tex}
+\input{CONFIG/settings.tex}
+\input{CONFIG/commands.tex}
+
+\begin{document}
+
+\include{SECTIONS/cover}
+
+\pagestyle{frontmatter}
+\pagenumbering{roman}
+\setcounter{page}{2}
+
+
+\clearpage
+\tableofcontents
+\clearpage
+\listoffigures
+\clearpage
+
+\pagestyle{fancy}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\include{SECTIONS/bab1}
+\include{SECTIONS/bab2}
+\include{SECTIONS/bab3}
+\include{SECTIONS/bab4}
+\include{SECTIONS/bab5}
+
+\clearpage
+\addcontentsline{toc}{chapter}{DAFTAR PUSTAKA}
+\printbibliography[title={\centering DAFTAR PUSTAKA}]
+
+
+\end{document}

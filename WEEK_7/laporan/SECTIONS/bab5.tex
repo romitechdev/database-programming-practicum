@@ -1,0 +1,54 @@
+\chapter{STUDI KASUS, EKSPORASI, DAN SIMPULAN}
+
+\section{Paging OFFSET 20000 (E1)}
+Query mengambil 20 baris dengan OFFSET 20000. Planner harus membaca dan membuang 20.000 baris sebelum menghasilkan hasil, sehingga lebih lambat dibanding keyset pagination.
+
+\insertimage{ss_E1_offset.png}{Hasil E1.}{fig:e1}
+
+\section{CONCAT LIKE (E2)}
+Fungsi \texttt{CONCAT} di kondisi WHERE membuat indeks tidak terpakai karena planner tidak bisa memetakan pola LIKE ke indeks. Query jatuh ke Seq Scan dan mengembalikan 0 baris.
+
+\insertimage{ss_E2_concat.png}{Hasil E2.}{fig:e2}
+
+\section{Gaji Tertinggi per Departemen (E3)}
+Query mencari gaji tertinggi per departemen dengan subquery MAX. Hasilnya 9 baris (satu per departemen) dengan waktu eksekusi 234 ms karena harus memindai seluruh data penempatan dan gaji.
+
+\insertimage{ss_E3_tertinggi.png}{Hasil E3.}{fig:e3}
+
+\section{NOT IN vs NOT EXISTS (E4)}
+NOT EXISTS 38\% lebih cepat (277 ms vs 450 ms) dan lebih aman. NOT IN rentan jebakan NULL: jika subquery mengembalikan satu saja NULL, seluruh NOT IN menghasilkan 0 baris.
+
+\insertimage{ss_E4_notin.png}{EXPLAIN E4.}{fig:e4}
+
+\section{Rekap Rekrut (E5)}
+Query menggabungkan data pegawai, title, dan penempatan dengan LEFT JOIN. Hasilnya 100 baris dengan waktu 45 ms, cukup cepat karena data sudah terindeks.
+
+\insertimage{ss_E5_rekap.png}{Hasil E5.}{fig:e5}
+
+\section{Partisi (G1)}
+Tabel terpartisi dibuat dengan PARTITION BY RANGE. Insert 1.000 baris berhasil, tetapi insert 2.8 juta baris timeout karena partisi menambah overhead routing per baris.
+
+\insertimage{ss_G1_partisi.png}{Partisi G1.}{fig:g1}
+
+\section{ANALYZE (G2)}
+Setelah update data besar tanpa ANALYZE, planner masih memakai statistik lama sehingga memilih rencana sub-optimal (7 ms). Setelah ANALYZE, planner punya statistik akurat dan query menjadi 0.036 ms (197x lebih cepat).
+
+\insertimage{ss_G2_analyze.png}{ANALYZE G2.}{fig:g2}
+
+\section{Force Index (G3)}
+Memaksa planner menggunakan indeks (\texttt{enable\_seqscan=off}) justru lebih lambat (62 ms) dibanding planner bebas (0.43 ms). Planner bebas memilih Index Scan yang sudah optimal; force index menambah overhead tanpa manfaat.
+
+\insertimage{ss_G3_force.png}{Force index G3.}{fig:g3}
+
+\section{Simpulan}
+\begin{enumerate}
+  \item Indeks mengubah query dari 30--250 ms menjadi $<$1 ms pada kolom selektif.
+  \item Urutan kolom pada indeks gabungan menentukan selektifitas: kolom paling selektif di depan.
+  \item Fungsi di kolom WHERE membuat indeks diabaikan (non-sargable).
+  \item EXISTS/JOIN lebih cepat daripada IN; dekorrelasi lebih cepat daripada korelasi.
+  \item Kolom spesifik lebih cepat daripada \texttt{SELECT *}.
+  \item Keyset lebih cepat daripada OFFSET untuk paging.
+  \item Tabel ringkasan sangat cepat untuk baca; overhead tulis kecil.
+  \item NOT EXISTS lebih cepat dan lebih aman daripada NOT IN.
+  \item ANALYZE wajib dijalankan setelah perubahan data besar.
+\end{enumerate}

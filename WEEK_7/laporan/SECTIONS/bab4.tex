@@ -1,0 +1,36 @@
+\chapter{FUNGSI, TRIGGER, DAN RINGKASAN}
+
+\section{Pembuatan Fungsi (D1)}
+Fungsi \texttt{fn\_gaji\_berjalan} mengembalikan gaji terkini untuk satu pegawai. Fungsi ini dipakai untuk membandingkan kinerja pemanggilan fungsi per baris dengan JOIN langsung.
+
+\insertimage{ss_D1_fn.png}{Fungsi \texttt{fn\_gaji\_berjalan} berhasil dibuat.}{fig:d1}
+
+\section{Fungsi per Baris vs JOIN (D2)}
+Memanggil fungsi untuk setiap baris (300.024 kali) jauh lebih lambat daripada JOIN sekali. JOIN 9.4 kali lebih cepat (634 ms vs 5963 ms) karena tidak ada overhead pemanggilan fungsi berulang.
+
+\insertimage{ss_D2_fn_vs_join.png}{EXPLAIN D2.}{fig:d2}
+
+\section{Fungsi di WHERE (D3)}
+Fungsi di kondisi WHERE membuat indeks tidak bisa dipakai karena hasilnya tidak bisa diprediksi oleh planner. JOIN langsung 33 kali lebih cepat (159 ms vs 5204 ms) karena bisa memakai indeks dan paralelisasi.
+
+\insertimage{ss_D3_fn_where.png}{EXPLAIN D3.}{fig:d3}
+
+\section{Tabel Ringkasan + Trigger (D4)}
+Tabel ringkasan menyimpan agregat (gaji max, gaji rata) per pegawai. Trigger pada tabel \texttt{gaji} otomatis memperbarui ringkasan setiap ada INSERT, UPDATE, atau DELETE sehingga data ringkasan selalu konsisten.
+
+\insertimage{ss_D4_ringkasan.png}{Tabel ringkasan + trigger.}{fig:d4}
+
+\section{Biaya Baca (D5)}
+Membaca dari tabel ringkasan (9 baris) 8977 kali lebih cepat daripada JOIN langsung ke tabel gaji (2.8 juta baris). Ini menunjukkan trade-off: ringkasan sangat cepat untuk baca tetapi harus dipelihara saat tulis.
+
+\insertimage{ss_D5_baca.png}{Biaya baca D5.}{fig:d5}
+
+\section{Biaya Tulis (D6)}
+Overhead trigger cukup kecil: 7.6\% (22.38 ms vs 20.79 ms per 1000 insert). Trigger hanya mengupdate 1 baris di ringkasan per operasi, sehingga biayanya relatif murah dibanding keuntungan 8977x di sisi baca.
+
+\insertimage{ss_D6_tulis.png}{Biaya tulis D6.}{fig:d6}
+
+\section{Verifikasi Ketepatan (D8)}
+Nilai di tabel ringkasan dibandingkan dengan hasil agregasi langsung dari tabel gaji. Ketiga sampel yang diuji menghasilkan nilai yang sama, membuktikan trigger berhasil menjaga konsistensi data.
+
+\insertimage{ss_D8_verifikasi.png}{Verifikasi ketepatan ringkasan (D8).}{fig:d8}

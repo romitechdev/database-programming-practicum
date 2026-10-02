@@ -1,0 +1,23 @@
+\chapter{PERSIAPAN}
+
+\section{Pembuatan Database}
+Database \texttt{db\_optimasi} dibuat sebagai tempat kerja praktikum. Database ini terpisah dari database sumber \texttt{employees} agar data asli tidak terpengaruh oleh eksperimen. Seluruh objek yang dibuat selama praktikum hanya ada di database ini dan akan dihapus di akhir.
+
+\insertimage{ss_A1_create_db.png}{Database \texttt{db\_optimasi} berhasil dibuat.}{fig:a1}
+
+\section{Pembuatan Tabel}
+Empat tabel (\texttt{pegawai}, \texttt{gaji}, \texttt{penempatan}, \texttt{departemen}) disalin dari database \texttt{employees} menggunakan ekstensi \texttt{postgres\_fdw} dan CTAS. CTAS hanya menyalin data tanpa indeks, sehingga kondisi awal ``tanpa indeks'' terjamin. Jumlah baris masing-masing tabel sesuai dengan data sumber.
+
+\insertimage{ss_A2_tabel.png}{Keempat tabel berhasil dibuat.}{fig:a2}
+
+\insertimage{ss_A3_jumlah_baris.png}{Jumlah baris keempat tabel.}{fig:a3}
+
+\section{Verifikasi Struktur}
+Query terhadap \texttt{pg\_indexes} untuk keempat tabel mengembalikan 0 baris. Ini membuktikan bahwa tidak ada indeks non-primary-key yang tersisa, sehingga kondisi awal untuk pengukuran baseline benar-benar tanpa indeks.
+
+\insertimage{ss_A4_struktur.png}{Bukti tidak ada indeks non-PK.}{fig:a4}
+
+\section{Tabel Pencatatan}
+Tabel \texttt{catatan\_kinerja} dibuat untuk menyimpan hasil setiap pengukuran. Kolom yang dicatat meliputi kode soal, keterangan query, kondisi (sebelum/sesudah), waktu dalam milidetik, jumlah baris yang diperiksa, dan jenis akses yang digunakan planner.
+
+\insertimage{ss_A5_catatan.png}{Tabel \texttt{catatan\_kinerja} berhasil dibuat.}{fig:a5}

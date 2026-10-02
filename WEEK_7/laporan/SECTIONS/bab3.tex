@@ -1,0 +1,36 @@
+\chapter{REWRITE QUERY}
+
+\section{IN vs EXISTS vs JOIN (C1)}
+Ketiga bentuk logika diuji untuk query ``pegawai yang pernah ditempatkan di departemen d005''. EXISTS dan JOIN setara (581 ms dan 585 ms), keduanya 23\% lebih cepat daripada IN (753 ms). Perbedaannya kecil karena data sudah terindeks.
+
+\insertimage{ss_C1_in_exists_join.png}{EXPLAIN C1: ketiga bentuk.}{fig:c1}
+
+\section{Korelasi vs Dekorrelasi (C2)}
+Subquery korelasi mengeksekusi query dalam untuk setiap baris luar, sedangkan dekorrelasi mengubahnya menjadi JOIN sekali. Dekorrelasi 2.6 kali lebih cepat (0.74 ms vs 1.9 ms) karena menghindari eksekusi berulang.
+
+\insertimage{ss_C2_korelasi.png}{EXPLAIN C2.}{fig:c2}
+
+\section{SELECT * vs Kolom Spesifik (C3)}
+\texttt{SELECT *} mengambil semua kolom termasuk yang tidak dibutuhkan, sehingga I/O lebih besar. Kolom spesifik 8.7 kali lebih cepat (174 ms vs 1373 ms) karena hanya membaca data yang diperlukan dan bisa memakai Index Only Scan.
+
+\insertimage{ss_C3_select_star.png}{EXPLAIN C3.}{fig:c3}
+
+\section{ORDER BY: Sort vs Indeks (C4)}
+Tanpa indeks, PostgreSQL harus membaca semua baris lalu sort (100 ms). Dengan indeks yang sudah terurut, planner langsung mengambil 20 baris teratas (0.091 ms), 1100 kali lebih cepat.
+
+\insertimage{ss_C4_orderby.png}{EXPLAIN C4.}{fig:c4}
+
+\section{Paging: OFFSET vs Keyset (C5)}
+OFFSET memaksa database membaca dan membuang 20.000 baris sebelum mengambil 20 baris berikutnya. Keyset (WHERE kolom > nilai\_terakhir) langsung melompat ke posisi yang diinginkan, 230 kali lebih cepat (0.084 ms vs 19.5 ms).
+
+\insertimage{ss_C5_paging.png}{EXPLAIN C5.}{fig:c5}
+
+\section{Subquery vs JOIN (C6)}
+Subquery korelasi mengeksekusi query agregasi untuk setiap departemen (9 kali). JOIN + GROUP BY melakukan agregasi sekali untuk semua data, 4.8 kali lebih cepat (1877 ms vs 8926 ms).
+
+\insertimage{ss_C6_subquery.png}{EXPLAIN C6.}{fig:c6}
+
+\section{DISTINCT vs GROUP BY (C7)}
+Keduanya menghasilkan rencana eksekusi yang sama (HashAggregate). Selisih waktu kecil (102 ms vs 120 ms) karena jumlah baris yang di-hapus duplikatnya tidak terlalu besar.
+
+\insertimage{ss_C7_distinct.png}{EXPLAIN C7.}{fig:c7}

@@ -1,0 +1,41 @@
+\chapter{PENGARUH INDEKS}
+
+\section{Baseline Tanpa Indeks (B1)}
+Keempat query diukur tanpa indeks sebagai baseline. Seluruhnya memakai Parallel Seq Scan karena planner tidak punya pilihan lain. Waktu bervariasi dari 30 ms hingga 253 ms tergantung jumlah baris yang harus dipindai.
+
+\insertimage{ss_B1_baseline.png}{EXPLAIN B1: seluruhnya Parallel Seq Scan.}{fig:b1}
+
+\section{Tambah PK + Indeks emp\_no (B2)}
+Setelah menambah primary key dan indeks pada \texttt{emp\_no}, query berubah dari Seq Scan menjadi Index Scan. Q1 dipercepat dari 30 ms menjadi 0.056 ms (99.8\%), dan Q2 dari 253 ms menjadi 0.051 ms (99.98\%).
+
+\insertimage{ss_B2_idx_empno.png}{EXPLAIN B2: Index Scan menggantikan Seq Scan.}{fig:b2}
+
+\section{Indeks last\_name (B3)}
+Indeks pada \texttt{last\_name} mengubah query Q3 dari 38 ms menjadi 0.446 ms. Planner memilih Bitmap Index Scan karena hasil query-nya relatif banyak (167 baris) sehingga lebih efisien daripada Index Scan langsung.
+
+\insertimage{ss_B3_idx_lastname.png}{EXPLAIN B3: Bitmap Heap Scan.}{fig:b3}
+
+\section{Indeks Gabungan: Urutan Kolom (B4)}
+Dua susunan indeks gabungan dibuat: \texttt{(to\_date, salary)} dan \texttt{(salary, to\_date)}. Susunan pertama 24\% lebih cepat karena kolom \texttt{to\_date} lebih selektif (hanya 1/2844 baris) sehingga mempersempit kandidat lebih banyak sebelum kolom kedua diperiksa.
+
+\insertimage{ss_B4_gabungan.png}{EXPLAIN B4: kedua query memakai Index Scan.}{fig:b4}
+
+\section{Awalan Kiri (B5)}
+Indeks gabungan hanya bisa dipakai jika kolom pertamanya ikut dalam kondisi WHERE (aturan awalan kiri). Query yang hanya menyaring kolom kedua tidak bisa memakai indeks gabungan dan jatuh ke indeks lain atau Seq Scan.
+
+\insertimage{ss_B5_awalan.png}{EXPLAIN B5: to\_date diabaikan, hanya salary yang terpakai.}{fig:b5}
+
+\section{Index-Only Scan (B6)}
+Covering index yang menyertakan kolom \texttt{salary} via \texttt{INCLUDE} memungkinkan Index Only Scan. Planner tidak perlu mengakses heap, sehingga query dipercepat dari 523 ms menjadi 96 ms (81.6\%).
+
+\insertimage{ss_B6_covering.png}{EXPLAIN B6: Index Only Scan.}{fig:b6}
+
+\section{Sargable vs Non-Sargable (B7)}
+Fungsi yang membungkus kolom di WHERE membuat indeks diabaikan karena PostgreSQL tidak bisa membandingkan nilai indeks dengan hasil fungsi. Query sargable (langsung membandingkan kolom) 0.12 ms, sedangkan non-sargable 78 ms dengan Seq Scan.
+
+\insertimage{ss_B7_sargable.png}{EXPLAIN B7: non-sargable jatuh ke Seq Scan.}{fig:b7}
+
+\section{Biaya Tulis Indeks (B8)}
+Insert 10.000 baris tanpa indeks memakan 42.66 ms, sedangkan dengan 2 indeks menjadi 116.26 ms (+172\%). Setiap insert harus memperbarui semua indeks yang ada, sehingga semakin banyak indeks semakin mahal biaya tulisnya.
+
+\insertimage{ss_B8_tulis.png}{Biaya insert B8.}{fig:b8}

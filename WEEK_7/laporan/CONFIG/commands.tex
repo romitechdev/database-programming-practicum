@@ -1,0 +1,58 @@
+\newcommand{\ifexists}[3]{\IfFileExists{#1}{#2}{#3}}
+
+\newcommand{\insertimage}[3]{%
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{#1}%
+    \caption{#2}
+    \label{#3}
+  \end{figure}
+}
+
+\newcommand{\important}[1]{\textbf{#1}}
+\newcommand{\definition}[1]{\textit{#1}}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  frame=single,
+  rulecolor=\color{black!30},
+  backgroundcolor=\color{black!5},
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{gray!80!black}\itshape,
+  stringstyle=\color{teal!80!black},
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=1.5em,
+  framexleftmargin=1.5em
+}
+
+\lstdefinelanguage{SQL}{
+  keywords={SELECT,FROM,WHERE,INSERT,INTO,VALUES,UPDATE,SET,DELETE,
+            CREATE,TABLE,INDEX,VIEW,TRIGGER,PROCEDURE,FUNCTION,IF,ELSE,
+            BEGIN,END,CASE,THEN,WHEN,AND,OR,NOT,NULL,IS,IN,LIKE,AS,ON,
+            JOIN,LEFT,RIGHT,INNER,OUTER,FULL,GROUP,BY,ORDER,HAVING,
+            LIMIT,OFFSET,PRIMARY,KEY,FOREIGN,REFERENCES,UNIQUE,CHECK,
+            DEFAULT,CHARSET,COLLATE,DATABASE,USE,ASC,DESC,DISTINCT,
+            BEFORE,AFTER,EACH,ROW,NEW,OLD},
+  keywordstyle=\color{blue!70!black}\bfseries,
+  sensitive=false,
+  morecomment=[l]{--},
+  morestring=[b]',
+  morestring=[b]",
+}
+
+\newcommand{\insertlogo}{%
+  \begin{center}
+  \IfFileExists{ASSETS/logo-unesa.png}
+    {\includegraphics[width=4.5cm,height=4.5cm,keepaspectratio]{ASSETS/logo-unesa.png}}
+    {\fbox{\parbox[c][4.5cm][c]{4.5cm}{\centering
+        \small\textbf{LOGO UNESA}\\[0.3cm]
+        \color{gray}(Letakkan di \texttt{ASSETS/})\\
+      }}}
+  \end{center}
+}

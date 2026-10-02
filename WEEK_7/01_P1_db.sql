@@ -1,0 +1,2 @@
+DROP DATABASE IF EXISTS db_optimasi;
+CREATE DATABASE db_optimasi;

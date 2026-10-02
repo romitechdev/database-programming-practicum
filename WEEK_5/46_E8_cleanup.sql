@@ -1,0 +1,21 @@
+DROP FUNCTION IF EXISTS fn_bonus(INT);
+DROP FUNCTION IF EXISTS fn_faktorial(INT);
+DROP FUNCTION IF EXISTS fn_validasi_gaji(INT, INT);
+DROP FUNCTION IF EXISTS fn_peringkat_gaji(INT);
+DROP FUNCTION IF EXISTS fn_total_kenaikan(INT);
+DROP FUNCTION IF EXISTS fn_gaji_rata_dept(CHAR(4));
+DROP FUNCTION IF EXISTS fn_nama_dept(INT);
+DROP FUNCTION IF EXISTS fn_gaji_berjalan(INT);
+DROP FUNCTION IF EXISTS fn_group_thousands(BIGINT);
+DROP FUNCTION IF EXISTS fn_format_rupiah(DECIMAL(12,2));
+DROP FUNCTION IF EXISTS fn_kategori_gaji(INT);
+DROP FUNCTION IF EXISTS fn_rapikan_nama(VARCHAR(50));
+DROP FUNCTION IF EXISTS fn_masa_kerja_teks(DATE);
+DROP FUNCTION IF EXISTS fn_masa_kerja(DATE);
+DROP FUNCTION IF EXISTS fn_usia(DATE);
+
+DROP FUNCTION IF EXISTS trg_validasi_gaji();
+
+DROP VIEW IF EXISTS v_profil_pegawai;
+
+DROP TRIGGER IF EXISTS trg_cek_gaji ON gaji;

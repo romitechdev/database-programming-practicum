@@ -1,0 +1,176 @@
+% ==================================================================
+%  SETTINGS — tata letak, format, penomoran
+% ==================================================================
+
+% ------------------------------------------------------------------
+%  Margin
+% ------------------------------------------------------------------
+\geometry{
+  a4paper,
+  left    = 3cm,
+  top     = 3cm,
+  right   = 3cm,
+  bottom  = 3cm
+}
+
+% ------------------------------------------------------------------
+%  Spasi & paragraf
+% ------------------------------------------------------------------
+\setstretch{1.5}
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{4pt}
+
+% ------------------------------------------------------------------
+%  Heading BAB — tampil "BAB I", "BAB II", dst.
+%  Lampiran — tampil "LAMPIRAN A", "LAMPIRAN B", dst.
+%  Flag \ifinappendix diaktifkan di main.tex saat masuk lampiran.
+% ------------------------------------------------------------------
+\newif\ifinappendix
+
+\titleformat{\chapter}[block]
+  {\centering\normalfont\bfseries\Large}
+  {\ifinappendix LAMPIRAN~\Alph{chapter}\else BAB~\Roman{chapter}\fi}
+  {0.5em}{}
+\titlespacing*{\chapter}{0pt}{-1.5cm}{1.5\baselineskip}
+
+\titleformat{\section}
+  {\normalfont\bfseries\large}{\thesection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1\baselineskip}{0.5\baselineskip}
+
+\titleformat{\subsection}
+  {\normalfont\bfseries\normalsize}{\thesubsection}{0.5em}{}
+\titlespacing*{\subsection}{0pt}{0.75\baselineskip}{0.25\baselineskip}
+
+\titleformat{\subsubsection}
+  {\normalfont\bfseries\normalsize}{\thesubsubsection}{0.5em}{}
+\titlespacing*{\subsubsection}{0pt}{0.5\baselineskip}{0.25\baselineskip}
+
+% ------------------------------------------------------------------
+%  Daftar Isi — tampil "BAB I PENDAHULUAN" / "LAMPIRAN A ..."
+% ------------------------------------------------------------------
+\makeatletter
+\newcounter{toc@tmp}
+\newif\if@tocchap
+
+\def\bablabel#1{\bablabel@i#1\@nil}
+\def\bablabel@i#1#2\@nil{%
+  \ifnum`#1>47\relax
+    \ifnum`#1<58\relax
+      BAB~\setcounter{toc@tmp}{#1#2}\@Roman\c@toc@tmp
+    \else
+      LAMPIRAN~\uppercase{#1#2}%
+    \fi
+  \else
+    \uppercase{#1#2}%
+  \fi}
+
+\renewcommand{\numberline}[1]{%
+  \if@tocchap
+    \bablabel{#1}\enskip
+  \else
+    \hb@xt@\@tempdima{\@cftbsnum #1\@cftasnum\hfil}\@cftasnumb
+  \fi}
+
+\let\@orig@l@chapter\l@chapter
+\renewcommand*{\l@chapter}[2]{%
+  \@tocchaptrue
+  \@orig@l@chapter{#1}{#2}%
+  \@tocchapfalse}
+\makeatother
+
+\renewcommand{\cftchappresnum}{}
+\renewcommand{\cftchapaftersnum}{}
+\setlength{\cftchapnumwidth}{0pt}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftchappagefont}{\bfseries}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}} % Titik-titik rapi untuk BAB
+\setlength{\cftbeforechapskip}{0.6em}
+
+% Indentasi & lebar nomor subbab pada Daftar Isi
+% \cftsecindent: menjorokkan nomor section agar sejajar dengan teks judul bab
+\setlength{\cftsecindent}{1.5em}
+\setlength{\cftsecnumwidth}{2.3em}
+\setlength{\cftsubsecindent}{4.8em}
+\setlength{\cftsubsecnumwidth}{3em}
+
+\setlength{\cftbeforetoctitleskip}{-1.5cm}
+\setlength{\cftbeforelottitleskip}{-1.5cm}
+\setlength{\cftbeforeloftitleskip}{-1.5cm}
+\setlength{\cftaftertoctitleskip}{1em}
+
+% Judul "DAFTAR ISI", "DAFTAR TABEL", "DAFTAR GAMBAR" — cetak tebal kapital
+\renewcommand{\cfttoctitlefont}{\hfill\bfseries\Large}
+\renewcommand{\cftlottitlefont}{\hfill\bfseries\Large}
+\renewcommand{\cftloftitlefont}{\hfill\bfseries\Large}
+\renewcommand{\cftaftertoctitle}{\hfill}
+\renewcommand{\cftafterlottitle}{\hfill}
+\renewcommand{\cftafterloftitle}{\hfill}
+
+% ------------------------------------------------------------------
+%  Caption gambar & tabel
+%  Nomor otomatis: Gambar 1.1, Tabel 2.3, dsb.
+% ------------------------------------------------------------------
+\captionsetup{
+  font      = small,
+  labelfont = bf,
+  labelsep  = period,
+  justification = centering
+}
+
+% Penomoran tabel & gambar mengikuti nomor BAB
+\counterwithin{table}{chapter}
+\counterwithin{figure}{chapter}
+
+% Ubah teks "Gambar", "Tabel", & Judul Daftar ke bahasa Indonesia KAPITAL
+\addto\captionsbahasa{%
+  \renewcommand{\contentsname}{DAFTAR ISI}%
+  \renewcommand{\listtablename}{DAFTAR TABEL}%
+  \renewcommand{\listfigurename}{DAFTAR GAMBAR}%
+  \renewcommand{\figurename}{Gambar}%
+  \renewcommand{\tablename}{Tabel}%
+  \renewcommand{\lstlistingname}{Kode}%
+}
+
+% ------------------------------------------------------------------
+%  Penomoran daftar kode (listings) per-BAB
+% ------------------------------------------------------------------
+\AtBeginDocument{\counterwithin{lstlisting}{chapter}}
+
+% ------------------------------------------------------------------
+%  Daftar Pustaka — APA 7th style, hanging indent
+% ------------------------------------------------------------------
+\setlength{\bibhang}{1.27cm}
+
+% ------------------------------------------------------------------
+%  Header & footer
+% ------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\fancyhead[L]{\small\MakeUppercase{\leftmark}}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14.5pt}
+
+% Halaman sampul — tidak ada header/footer/nomor halaman
+\fancypagestyle{cover}{%
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+% Halaman setelah sampul (kata pengantar, daftar isi, dst.) — nomor romawi
+\fancypagestyle{frontmatter}{%
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+% ------------------------------------------------------------------
+%  Penomoran BAB di header menggunakan teks BAB X
+% ------------------------------------------------------------------
+\renewcommand{\chaptermark}[1]{%
+  \markboth{%
+    \ifinappendix Lampiran \Alph{chapter}\ #1%
+    \else Bab \Roman{chapter}\ #1%
+    \fi%
+  }{}}
